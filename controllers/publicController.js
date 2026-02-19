@@ -1,0 +1,137 @@
+const Table = require("../models/tableModel");
+const MenuItem = require("../models/MenuItem");
+const Restaurant = require("../models/restaurantModel");
+const Order = require("../models/Order");
+const Notification = require("../models/Notification");
+const asyncHandler = require("../utils/asyncHandler");
+const { validateOrderItems } = require("../utils/orderValidation");
+
+// GET menu using table QR
+exports.getMenuByTable = asyncHandler(async (req, res) => {
+  const table = await Table.findById(req.params.tableId);
+
+  if (!table) {
+    res.status(404);
+    throw new Error("Table not found");
+  }
+
+  const restaurant = await Restaurant.findById(table.restaurantId);
+
+  const menu = await MenuItem.find({
+    restaurantId: table.restaurantId,
+    available: true,
+  });
+
+  res.json({
+    restaurantName: restaurant ? restaurant.name : "Greenleaf Dining",
+    tableNumber: table.tableNumber,
+    menu,
+  });
+});
+
+// POST order from QR
+exports.createPublicOrder = asyncHandler(async (req, res) => {
+  const { tableId, items, paymentMethod } = req.body;
+
+  const table = await Table.findById(tableId);
+
+  if (!table) {
+    res.status(404);
+    throw new Error("Table not found");
+  }
+
+  let menuItems;
+  try {
+    menuItems = await validateOrderItems(items, table.restaurantId);
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+
+  let calculatedTotal = 0;
+
+  items.forEach((orderItem) => {
+    const menu = menuItems.find(
+      (m) => m._id.toString() === orderItem.menuItemId
+    );
+
+    if (!menu) return;
+
+    calculatedTotal += (menu.price || 0) * (orderItem.quantity || 1);
+
+    orderItem.price = menu.price;
+    orderItem.name = menu.name;
+  });
+
+  // calculate wait time using menu prepTime
+  let estimatedWaitTime = 0;
+
+  if (menuItems.length) {
+    estimatedWaitTime = Math.max(
+      ...menuItems.map((m) => m.prepTime || 0),
+      0
+    );
+  }
+
+  const restaurantId = table.restaurantId;
+  const tableNumber = table.tableNumber;
+
+  let status = "PLACED";
+
+  if (paymentMethod === "CASH") {
+    status = "PENDING_CONFIRMATION";
+  }
+
+  const order = await Order.create({
+    restaurantId,
+    tableNumber,
+    items,
+    total: calculatedTotal,
+    paymentMethod,
+    orderSource: "QR",
+    status,
+    estimatedWaitTime,
+    confirmedByWaiter: false,
+  });
+
+  // Emit realtime event to kitchen dashboard (restaurant room)
+  const io = req.app.get("io");
+  io.to(`restaurant_${restaurantId}`).emit("new-order", order);
+
+  res.status(201).json(order);
+});
+
+// POST call waiter from QR
+exports.callWaiter = asyncHandler(async (req, res) => {
+  const { tableId } = req.body;
+
+  if (!tableId) {
+    res.status(400);
+    throw new Error("tableId is required");
+  }
+
+  const table = await Table.findById(tableId);
+
+  if (!table) {
+    res.status(404);
+    throw new Error("Table not found");
+  }
+
+  const io = req.app.get("io");
+  const roomName = `restaurant_${table.restaurantId.toString()}`;
+
+  // Create persistent notification record
+  const notification = await Notification.create({
+    restaurantId: table.restaurantId,
+    tableNumber: table.tableNumber,
+    type: "WAITER_CALL"
+  });
+
+  console.log(`Emitting waiter-called to room: ${roomName} for table: ${table.tableNumber}`);
+
+  io.to(roomName).emit("waiter-called", {
+    ...notification.toObject(),
+    calledAt: notification.createdAt, // For frontend compatibility
+  });
+
+  res.json({ message: "Waiter notified successfully", notification });
+});
