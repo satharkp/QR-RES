@@ -2,6 +2,7 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import { useEffect, useState, useRef, useMemo } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { API_BASE, SOCKET_URL } from "../services/api";
 
 export default function KitchenPage() {
   const [orders, setOrders] = useState([]);
@@ -45,7 +46,7 @@ export default function KitchenPage() {
   const fetchOrders = async () => {
     try {
       if (!token) return;
-      const res = await axios.get("http://localhost:5050/api/orders/kitchen", {
+      const res = await axios.get(`${API_BASE}/orders/kitchen`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const incomingOrders = res.data || [];
@@ -67,7 +68,7 @@ export default function KitchenPage() {
 
   useEffect(() => {
     fetchOrders();
-    const socket = io("http://localhost:5050");
+    const socket = io(SOCKET_URL);
     const storedToken = localStorage.getItem("token");
     if (!storedToken) return;
     const payload = JSON.parse(atob(storedToken.split(".")[1]));
@@ -102,7 +103,7 @@ export default function KitchenPage() {
   }, []);
 
   const updateStatus = async (id, status) => {
-    await axios.patch(`http://localhost:5050/api/orders/${id}/status`, { status }, {
+    await axios.patch(`${API_BASE}/orders/${id}/status`, { status }, {
       headers: { Authorization: `Bearer ${token}` },
     });
     fetchOrders();
@@ -186,13 +187,11 @@ export default function KitchenPage() {
             {orders.map((order) => (
               <div
                 key={order._id}
-                className={`w-full flex flex-col relative overflow-hidden transition-all duration-500 animate-in zoom-in-95 ${
-  newOrderIds.includes(order._id) ? "ring-8 ring-greenleaf-secondary scale-[1.01]" : ""
-} ${
-  tvMode
-    ? "bg-white/10 rounded-[3rem] border border-white/20"
-    : "bg-white rounded-[2rem] shadow-floating border border-greenleaf-accent"
-}`}
+                className={`w-full flex flex-col relative overflow-hidden transition-all duration-500 animate-in zoom-in-95 ${newOrderIds.includes(order._id) ? "ring-8 ring-greenleaf-secondary scale-[1.01]" : ""
+                  } ${tvMode
+                    ? "bg-white/10 rounded-[3rem] border border-white/20"
+                    : "bg-white rounded-[2rem] shadow-floating border border-greenleaf-accent"
+                  }`}
               >
                 {/* Order Ticket Header */}
                 <div className={`p-8 border-b flex justify-between items-center ${tvMode ? "bg-white/10 border-white/20" : "bg-greenleaf-accent border-greenleaf-accent"}`}>

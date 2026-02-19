@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE } from "../../services/api";
 
 export default function WaitersSection() {
   const [waiters, setWaiters] = useState([]);
@@ -34,7 +35,7 @@ export default function WaitersSection() {
   const fetchWaiters = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5050/api/users/waiters",
+        `${API_BASE}/users/waiters`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setWaiters(res.data);
@@ -48,7 +49,7 @@ export default function WaitersSection() {
       const payload = JSON.parse(atob(token.split(".")[1]));
 
       const res = await axios.get(
-        `http://localhost:5050/api/tables/${payload.restaurantId}`,
+        `${API_BASE}/tables/${payload.restaurantId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -61,7 +62,7 @@ export default function WaitersSection() {
   const createWaiter = async () => {
     try {
       await axios.post(
-        "http://localhost:5050/api/users/waiter",
+        `${API_BASE}/users/waiter`,
         { email: waiterEmail, password: waiterPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -79,7 +80,7 @@ export default function WaitersSection() {
 
     try {
       await axios.delete(
-        `http://localhost:5050/api/users/waiters/${waiterId}`,
+        `${API_BASE}/users/waiters/${waiterId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -98,7 +99,7 @@ export default function WaitersSection() {
 
     try {
       await axios.patch(
-        `http://localhost:5050/api/users/waiters/${waiterId}/tables`,
+        `${API_BASE}/users/waiters/${waiterId}/tables`,
         { tableIds: [] },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -128,7 +129,7 @@ export default function WaitersSection() {
 
           if (remainingTables.length !== (w.assignedTables || []).length) {
             await axios.patch(
-              `http://localhost:5050/api/users/waiters/${w._id}/tables`,
+              `${API_BASE}/users/waiters/${w._id}/tables`,
               { tableIds: remainingTables },
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -138,7 +139,7 @@ export default function WaitersSection() {
 
       // Assign tables to selected waiter
       await axios.patch(
-        `http://localhost:5050/api/users/waiters/${selectedWaiter}/tables`,
+        `${API_BASE}/users/waiters/${selectedWaiter}/tables`,
         { tableIds: selectedTables },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -195,11 +196,10 @@ export default function WaitersSection() {
           {waiters.map((w) => (
             <div
               key={w._id}
-              className={`border rounded-xl p-4 shadow-sm transition ${
-                selectedWaiter === w._id
+              className={`border rounded-xl p-4 shadow-sm transition ${selectedWaiter === w._id
                   ? "border-blue-500 bg-blue-50"
                   : "bg-gray-50"
-              }`}
+                }`}
             >
               <p className="font-semibold text-gray-800">{w.email}</p>
               <p className="text-xs text-gray-500">
@@ -293,13 +293,12 @@ export default function WaitersSection() {
                       : [...prev, t._id]
                   );
                 }}
-                className={`px-3 py-2 rounded-lg border transition ${
-                  locked
+                className={`px-3 py-2 rounded-lg border transition ${locked
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                     : selectedTables.includes(t._id)
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-100 hover:bg-gray-200"
+                  }`}
               >
                 Table {t.tableNumber}
                 {locked && <span className="ml-2 text-xs">(assigned)</span>}
@@ -369,9 +368,8 @@ export default function WaitersSection() {
 
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 px-4 py-2 rounded shadow text-white ${
-            toast.type === "error" ? "bg-red-600" : "bg-green-600"
-          }`}
+          className={`fixed bottom-6 right-6 px-4 py-2 rounded shadow text-white ${toast.type === "error" ? "bg-red-600" : "bg-green-600"
+            }`}
         >
           {toast.message}
         </div>

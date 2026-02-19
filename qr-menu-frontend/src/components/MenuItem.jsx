@@ -1,12 +1,12 @@
 import React from 'react';
 
-const API_BASE = "http://localhost:5050";
+import { SOCKET_URL as API_BASE_ROOT } from "../services/api";
 
 const MenuItem = ({ item, qty, onAdd, onRemove }) => {
   const imageUrl = item.image
     ? item.image.startsWith("http")
       ? item.image
-      : `${API_BASE}${item.image.startsWith("/") ? item.image : `/uploads/${item.image}`}`
+      : `${API_BASE_ROOT}${item.image.startsWith("/") ? item.image : `/uploads/${item.image}`}`
     : "https://placehold.co/400x300?text=No+Image";
 
   return (

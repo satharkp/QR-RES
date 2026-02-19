@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
 import DashboardLayout from "../components/layout/DashboardLayout";
-import { fetchNotifications, acknowledgeNotification } from "../services/api";
+import { fetchNotifications, acknowledgeNotification, API_BASE, SOCKET_URL } from "../services/api";
 const notificationSound = new Audio("/notification.mp3");
 
 
@@ -23,7 +23,7 @@ export default function WaiterPage() {
   const fetchAssignedTables = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5050/api/users/waiter/me/tables",
+        `${API_BASE}/users/waiter/me/tables`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setAssignedTables(res.data || []);
@@ -35,7 +35,7 @@ export default function WaiterPage() {
   // Fetch orders
   const fetchOrders = async () => {
     try {
-      const res = await axios.get("http://localhost:5050/api/orders/waiter", {
+      const res = await axios.get(`${API_BASE}/orders/waiter`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrders(res.data || []);
@@ -47,7 +47,7 @@ export default function WaiterPage() {
   // Fetch menu
   const fetchMenuData = async (restaurantId) => {
     try {
-      const res = await axios.get(`http://localhost:5050/api/menu/${restaurantId}`);
+      const res = await axios.get(`${API_BASE}/menu/${restaurantId}`);
       setMenu(res.data || []);
     } catch (err) {
       console.error("Failed to load menu", err.message);
@@ -89,7 +89,7 @@ export default function WaiterPage() {
     fetchOrders();
     fetchMenuData(decoded.restaurantId);
 
-    const socket = io("http://localhost:5050");
+    const socket = io(SOCKET_URL);
     socket.emit("joinRestaurant", decoded.restaurantId);
 
     socket.on("order-updated", fetchOrders);
@@ -147,7 +147,7 @@ export default function WaiterPage() {
 
   const confirmOrder = async (id) => {
     try {
-      await axios.patch(`http://localhost:5050/api/orders/${id}/confirm`, {}, {
+      await axios.patch(`${API_BASE}/orders/${id}/confirm`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchOrders();
@@ -158,7 +158,7 @@ export default function WaiterPage() {
 
   const updateOrderStatus = async (id, status) => {
     try {
-      await axios.patch(`http://localhost:5050/api/orders/${id}/status`, { status }, {
+      await axios.patch(`${API_BASE}/orders/${id}/status`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchOrders();
@@ -181,7 +181,7 @@ export default function WaiterPage() {
 
     const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
     try {
-      await axios.post("http://localhost:5050/api/orders", {
+      await axios.post(`${API_BASE}/orders`, {
         restaurantId: payload.restaurantId,
         tableNumber: table.tableNumber,
         items: cart,

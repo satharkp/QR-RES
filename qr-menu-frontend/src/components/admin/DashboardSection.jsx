@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE } from "../../services/api";
 
 export default function DashboardSection() {
   const [restaurant, setRestaurant] = useState(null);
@@ -15,7 +16,7 @@ export default function DashboardSection() {
   const fetchRestaurant = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5050/api/restaurants",
+        `${API_BASE}/restaurants`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

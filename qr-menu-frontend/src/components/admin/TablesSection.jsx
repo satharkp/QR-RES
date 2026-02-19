@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE } from "../../services/api";
 
 export default function TablesSection() {
   const [tables, setTables] = useState([]);
@@ -18,7 +19,7 @@ export default function TablesSection() {
   const fetchTables = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5050/api/tables/${restaurantId}`,
+        `${API_BASE}/tables/${restaurantId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -46,7 +47,7 @@ export default function TablesSection() {
       // Create tables one by one to avoid duplicate index errors
       for (let i = 0; i < count; i++) {
         await axios.post(
-          "http://localhost:5050/api/tables",
+          `${API_BASE}/tables`,
           {
             restaurantId,
             tableNumber: startFrom + i,
@@ -69,7 +70,7 @@ export default function TablesSection() {
     if (!window.confirm("Delete this table?")) return;
 
     try {
-      await axios.delete(`http://localhost:5050/api/tables/${tableId}`, {
+      await axios.delete(`${API_BASE}/tables/${tableId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

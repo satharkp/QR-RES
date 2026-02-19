@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE, SOCKET_URL } from "../../services/api";
 import imageCompression from "browser-image-compression";
 
 export default function MenuSection() {
@@ -34,7 +35,7 @@ export default function MenuSection() {
       if (!restaurantId) return;
 
       const res = await axios.get(
-        `http://localhost:5050/api/menu/${restaurantId}`,
+        `${API_BASE}/menu/${restaurantId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -84,7 +85,7 @@ export default function MenuSection() {
         formData.append("image", imageFile);
       }
 
-      await axios.post("http://localhost:5050/api/menu", formData, {
+      await axios.post(`${API_BASE}/menu`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -209,8 +210,8 @@ export default function MenuSection() {
                 const src = imageUrl.startsWith("http")
                   ? imageUrl
                   : imageUrl.startsWith("/uploads")
-                  ? `http://localhost:5050${imageUrl}`
-                  : `http://localhost:5050/uploads/${imageUrl}`;
+                    ? `${SOCKET_URL}${imageUrl}`
+                    : `${SOCKET_URL}/uploads/${imageUrl}`;
 
                 return (
                   <img
@@ -237,7 +238,7 @@ export default function MenuSection() {
                 onClick={async () => {
                   try {
                     await axios.patch(
-                      `http://localhost:5050/api/menu/${item._id}/availability`,
+                      `${API_BASE}/menu/${item._id}/availability`,
                       { restaurantId },
                       { headers: { Authorization: `Bearer ${token}` } }
                     );
@@ -252,9 +253,8 @@ export default function MenuSection() {
                     alert("Failed to update availability");
                   }
                 }}
-                className={`px-3 py-1 rounded text-white ${
-                  item.available ? "bg-green-600" : "bg-gray-500"
-                }`}
+                className={`px-3 py-1 rounded text-white ${item.available ? "bg-green-600" : "bg-gray-500"
+                  }`}
               >
                 {item.available ? "Available" : "Hidden"}
               </button>
@@ -265,7 +265,7 @@ export default function MenuSection() {
 
                   try {
                     await axios.delete(
-                      `http://localhost:5050/api/menu/item/${item._id}`,
+                      `${API_BASE}/menu/item/${item._id}`,
                       {
                         headers: { Authorization: `Bearer ${token}` },
                         data: { restaurantId },
