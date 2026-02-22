@@ -57,15 +57,12 @@ const io = new Server(server, {
 app.set("io", io);
 
 io.on("connection", (socket) => {
-  console.log("Socket connected:", socket.id);
 
   socket.on("joinRestaurant", (restaurantId) => {
     socket.join(`restaurant_${restaurantId}`);
-    console.log("Joined room:", `restaurant_${restaurantId}`);
   });
 
   socket.on("disconnect", () => {
-    console.log("Socket disconnected:", socket.id);
   });
 });
 

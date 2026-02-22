@@ -1,11 +1,10 @@
 const { ZodError } = require("zod");
 
 const errorHandler = (err, req, res, next) => {
-  console.error("DEBUG - ERROR OCCURRED:", {
+  console.error("Error occurred:", {
     name: err.name,
     message: err.message,
     stack: err.stack,
-    body: req.body
   });
 
   // Handle Zod validation errors

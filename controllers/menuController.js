@@ -8,7 +8,19 @@ const {
 
 // Create menu item
 exports.createMenuItem = asyncHandler(async (req, res) => {
-  console.log("CREATE MENU ITEM - raw req.body:", req.body);
+
+  // Handle multipart/form-data portions (comes as string)
+  if (req.body.portions && typeof req.body.portions === "string") {
+    try {
+      req.body.portions = JSON.parse(req.body.portions);
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid portions format" });
+    }
+  }
+
+  // Convert numeric fields if sent as strings (FormData case)
+  if (req.body.price) req.body.price = Number(req.body.price);
+  if (req.body.prepTime) req.body.prepTime = Number(req.body.prepTime);
   const validatedData = createMenuItemSchema.parse(req.body);
 
   // Business validation for measurement type
@@ -45,7 +57,6 @@ exports.createMenuItem = asyncHandler(async (req, res) => {
     validatedData.price = undefined;
   }
 
-  console.log("CREATE MENU ITEM - validated data:", validatedData);
   const {
     name,
     measurementType,
@@ -68,6 +79,10 @@ exports.createMenuItem = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json(item);
+
+  // Emit realtime event
+  const io = req.app.get("io");
+  io.to(`restaurant_${restaurantId}`).emit("menu-item-created", item);
 });
 
 // Get menu by restaurant
@@ -86,6 +101,11 @@ exports.deleteMenuItem = asyncHandler(async (req, res) => {
   }
 
   await item.deleteOne();
+
+  // Emit realtime event
+  const io = req.app.get("io");
+  io.to(`restaurant_${item.restaurantId}`).emit("menu-item-deleted", req.params.id);
+
   res.json({ message: "Menu item deleted" });
 });
 
@@ -123,6 +143,11 @@ exports.updateMenuItem = asyncHandler(async (req, res) => {
   if (req.file) item.image = req.file.path;
 
   const updatedItem = await item.save();
+
+  // Emit realtime event
+  const io = req.app.get("io");
+  io.to(`restaurant_${updatedItem.restaurantId}`).emit("menu-item-updated", updatedItem);
+
   res.json(updatedItem);
 });
 
@@ -137,6 +162,10 @@ exports.toggleAvailability = asyncHandler(async (req, res) => {
 
   item.available = !item.available;
   await item.save();
+
+  // Emit realtime event
+  const io = req.app.get("io");
+  io.to(`restaurant_${item.restaurantId}`).emit("menu-item-updated", item);
 
   res.json({
     message: "Availability updated",

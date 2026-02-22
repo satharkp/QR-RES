@@ -1,4 +1,5 @@
 const asyncHandler = require("../utils/asyncHandler");
+const Restaurant = require("../models/restaurantModel");
 
 const checkRestaurantAccess = asyncHandler(async (req, res, next) => {
   const restaurantId = req.body.restaurantId || req.params.restaurantId;

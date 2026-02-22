@@ -23,6 +23,7 @@ exports.getMenuByTable = asyncHandler(async (req, res) => {
   });
 
   res.json({
+    restaurantId: table.restaurantId,
     restaurantName: restaurant ? restaurant.name : "Greenleaf Dining",
     tableNumber: table.tableNumber,
     menu,
@@ -126,7 +127,6 @@ exports.callWaiter = asyncHandler(async (req, res) => {
     type: "WAITER_CALL"
   });
 
-  console.log(`Emitting waiter-called to room: ${roomName} for table: ${table.tableNumber}`);
 
   io.to(roomName).emit("waiter-called", {
     ...notification.toObject(),
