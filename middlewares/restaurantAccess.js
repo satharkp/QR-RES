@@ -1,6 +1,6 @@
-const Restaurant = require("../models/restaurantModel");
+const asyncHandler = require("../utils/asyncHandler");
 
-const checkRestaurantAccess = async (req, res, next) => {
+const checkRestaurantAccess = asyncHandler(async (req, res, next) => {
   const restaurantId = req.body.restaurantId || req.params.restaurantId;
 
   if (!restaurantId) {
@@ -25,6 +25,6 @@ const checkRestaurantAccess = async (req, res, next) => {
   }
 
   next();
-};
+});
 
 module.exports = checkRestaurantAccess;

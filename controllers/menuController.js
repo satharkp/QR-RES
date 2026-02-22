@@ -8,7 +8,44 @@ const {
 
 // Create menu item
 exports.createMenuItem = asyncHandler(async (req, res) => {
-  createMenuItemSchema.parse(req.body);
+  console.log("CREATE MENU ITEM - raw req.body:", req.body);
+  const validatedData = createMenuItemSchema.parse(req.body);
+
+  // Business validation for measurement type
+  if (validatedData.measurementType === "UNIT") {
+    if (!validatedData.price) {
+      return res.status(400).json({
+        message: "Price is required for UNIT items",
+      });
+    }
+  }
+
+  if (validatedData.measurementType === "PORTION") {
+    if (
+      !validatedData.portions ||
+      !Array.isArray(validatedData.portions) ||
+      validatedData.portions.length === 0
+    ) {
+      return res.status(400).json({
+        message: "At least one portion is required for PORTION items",
+      });
+    }
+
+    const invalidPortion = validatedData.portions.find(
+      (p) => !p.label || !p.price
+    );
+
+    if (invalidPortion) {
+      return res.status(400).json({
+        message: "Each portion must have label and price",
+      });
+    }
+
+    // Remove top-level price if accidentally sent
+    validatedData.price = undefined;
+  }
+
+  console.log("CREATE MENU ITEM - validated data:", validatedData);
   const {
     name,
     measurementType,
@@ -17,8 +54,7 @@ exports.createMenuItem = asyncHandler(async (req, res) => {
     category,
     restaurantId,
     prepTime,
-  } = req.body;
-
+  } = validatedData;
 
   const item = await MenuItem.create({
     name,
@@ -67,7 +103,7 @@ exports.deleteRestaurantMenu = asyncHandler(async (req, res) => {
 
 // Update menu item
 exports.updateMenuItem = asyncHandler(async (req, res) => {
-  updateMenuItemSchema.parse(req.body);
+  const validatedData = updateMenuItemSchema.parse(req.body);
   const item = await MenuItem.findById(req.params.id);
 
   if (!item) {
@@ -75,7 +111,7 @@ exports.updateMenuItem = asyncHandler(async (req, res) => {
     throw new Error("Menu item not found");
   }
 
-  const { name, measurementType, price, portions, category, prepTime, available } = req.body;
+  const { name, measurementType, price, portions, category, prepTime, available } = validatedData;
 
   item.name = name ?? item.name;
   item.measurementType = measurementType ?? item.measurementType;

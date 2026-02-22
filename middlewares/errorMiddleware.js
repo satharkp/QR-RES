@@ -1,10 +1,15 @@
 const { ZodError } = require("zod");
 
 const errorHandler = (err, req, res, next) => {
-  console.error(err.message);
+  console.error("DEBUG - ERROR OCCURRED:", {
+    name: err.name,
+    message: err.message,
+    stack: err.stack,
+    body: req.body
+  });
 
   // Handle Zod validation errors
-  if (err instanceof ZodError) {
+  if (err.name === "ZodError" || err instanceof ZodError) {
     return res.status(400).json({
       message: "Validation failed",
       errors: err.errors.map((e) => ({
@@ -14,8 +19,10 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  res.status(err.statusCode || 500).json({
+  const statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
+  res.status(statusCode).json({
     message: err.message || "Server Error",
+    error: process.env.NODE_ENV === "development" ? err : undefined,
   });
 };
 

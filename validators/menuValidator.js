@@ -3,7 +3,10 @@ const { z } = require("zod");
 /* Portion schema */
 const portionSchema = z.object({
   label: z.string().min(1),
-  price: z.number().nonnegative(),
+  price: z.preprocess(
+    (val) => (val === "" || val === undefined ? undefined : Number(val)),
+    z.number().nonnegative()
+  ),
 });
 
 /* Create menu item schema */
@@ -19,7 +22,19 @@ const createMenuItemSchema = z
       (val) => (val === "" || val === undefined ? undefined : Number(val)),
       z.number().nonnegative().optional()
     ),
-    portions: z.array(portionSchema).optional(),
+    portions: z.preprocess(
+      (val) => {
+        if (typeof val === "string") {
+          try {
+            return JSON.parse(val);
+          } catch (e) {
+            return val;
+          }
+        }
+        return val;
+      },
+      z.array(portionSchema).optional()
+    ),
     prepTime: z.preprocess(
       (val) => (val === "" || val === undefined ? undefined : Number(val)),
       z.number().int().nonnegative().optional()
@@ -53,7 +68,19 @@ const updateMenuItemSchema = z.object({
   category: z.string().min(1).optional(),
   measurementType: z.enum(["UNIT", "PORTION"]).optional(),
   price: z.number().nonnegative().optional(),
-  portions: z.array(portionSchema).optional(),
+  portions: z.preprocess(
+    (val) => {
+      if (typeof val === "string") {
+        try {
+          return JSON.parse(val);
+        } catch (e) {
+          return val;
+        }
+      }
+      return val;
+    },
+    z.array(portionSchema).optional()
+  ),
   prepTime: z.number().int().nonnegative().optional(),
   available: z.boolean().optional(),
 });
