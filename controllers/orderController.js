@@ -10,7 +10,7 @@ const { validateOrderItems } = require("../utils/orderValidation");
 exports.createOrder = asyncHandler(async (req, res) => {
   createOrderSchema.parse(req.body);
 
-  const { restaurantId, tableNumber, items, total, paymentMethod, orderSource } = req.body;
+  const { restaurantId, tableNumber, items, paymentMethod, orderSource } = req.body;
 
   let status = "PLACED";
 
@@ -18,7 +18,45 @@ exports.createOrder = asyncHandler(async (req, res) => {
     status = "PENDING_CONFIRMATION";
   }
 
+  // Validate menu items belong to restaurant
   const menuItems = await validateOrderItems(items, restaurantId);
+
+  let calculatedTotal = 0;
+  const formattedItems = [];
+
+  for (const item of items) {
+    const menuItem = menuItems.find(
+      (m) => m._id.toString() === item.menuItemId
+    );
+
+    if (!menuItem) continue;
+
+    let itemPrice = Number(menuItem.price) || 0;
+
+    // Handle portion-based pricing
+    if (item.portion && Array.isArray(menuItem.portions)) {
+      const selectedPortion = menuItem.portions.find(
+        (p) => p.label === item.portion
+      );
+
+      if (selectedPortion) {
+        itemPrice = Number(selectedPortion.price) || 0;
+      }
+    }
+
+    const quantity = Number(item.quantity) || 1;
+    const itemTotal = Number(itemPrice) * Number(quantity);
+
+    calculatedTotal += itemTotal;
+
+    formattedItems.push({
+      name: menuItem.name,
+      quantity,
+      price: itemPrice,
+      portion: item.portion || null,
+      menuItemId: menuItem._id,
+    });
+  }
 
   const estimatedWaitTime = Math.max(
     ...menuItems.map((m) => m.prepTime || 0),
@@ -28,8 +66,8 @@ exports.createOrder = asyncHandler(async (req, res) => {
   const order = await Order.create({
     restaurantId,
     tableNumber,
-    items,
-    total,
+    items: formattedItems,
+    total: calculatedTotal,
     paymentMethod,
     orderSource,
     status,

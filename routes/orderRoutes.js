@@ -24,17 +24,21 @@ router.get("/waiter", protect, allowRoles("waiter"), getWaiterOrders);
 // Kitchen dashboard
 router.get("/kitchen", protect, allowRoles("kitchen", "admin"), getKitchenOrders);
 
+// Get orders by restaurant (MUST be before /:id)
+router.get("/restaurant/:restaurantId", getOrdersByRestaurant);
+
 // Get order by ID
 router.get("/:id", getOrderById);
 
 // Update status
-router.patch("/:id/status", protect, allowRoles("kitchen", "waiter", "admin"), updateOrderStatus);
+router.patch(
+  "/:id/status",
+  protect,
+  allowRoles("kitchen", "waiter", "admin"),
+  updateOrderStatus
+);
 
 // Confirm order
 router.patch("/:id/confirm", confirmOrder);
-
-// Get orders by restaurant
-router.get("/restaurant/:restaurantId", getOrdersByRestaurant);
-
 
 module.exports = router;

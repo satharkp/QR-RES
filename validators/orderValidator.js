@@ -7,6 +7,7 @@ const orderItemsSchema = z.array(
   z.object({
     menuItemId: z.string().min(1),
     quantity: z.number().int().positive(),
+    portion: z.string().nullable().optional(),
   })
 ).min(1);
 

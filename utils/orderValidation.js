@@ -6,14 +6,15 @@ const validateOrderItems = async (items, restaurantId) => {
   }
 
   const menuItemIds = items.map((i) => i.menuItemId).filter(Boolean);
+  const uniqueMenuItemIds = [...new Set(menuItemIds)];
 
   const menuItems = await MenuItem.find({
-    _id: { $in: menuItemIds },
+    _id: { $in: uniqueMenuItemIds },
     restaurantId,
     available: true,
   });
 
-  if (menuItems.length !== menuItemIds.length) {
+  if (menuItems.length !== uniqueMenuItemIds.length) {
     throw new Error("One or more menu items are unavailable");
   }
 

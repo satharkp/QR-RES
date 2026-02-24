@@ -57,10 +57,28 @@ exports.createPublicOrder = asyncHandler(async (req, res) => {
 
     if (!menu) return;
 
-    calculatedTotal += (menu.price || 0) * (orderItem.quantity || 1);
+    let itemPrice = Number(menu.price) || 0;
 
-    orderItem.price = menu.price;
-    orderItem.name = menu.name;
+    // Handle portion-based pricing
+    if (orderItem.portion && Array.isArray(menu.portions)) {
+      const selectedPortion = menu.portions.find(
+        (p) => p.label === orderItem.portion
+      );
+
+      if (selectedPortion) {
+        itemPrice = Number(selectedPortion.price) || 0;
+      }
+    }
+
+    const quantity = Number(orderItem.quantity) || 1;
+    const itemTotal = Number(itemPrice) * Number(quantity);
+
+    calculatedTotal += itemTotal;
+
+    orderItem.price = itemPrice;
+    orderItem.name = orderItem.portion
+      ? `${menu.name} (${orderItem.portion})`
+      : menu.name;
   });
 
   // calculate wait time using menu prepTime
