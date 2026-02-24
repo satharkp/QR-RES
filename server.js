@@ -17,6 +17,7 @@ const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const permanentRoutes = require("./routes/permantD");
+const paymentRoutes = require("./routes/paymentRoutes")
 
 
 const app = express();
@@ -41,6 +42,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/restaurants", permanentRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api/payments", paymentRoutes);
 app.use(notFound);
 app.use(errorHandler);
 

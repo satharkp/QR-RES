@@ -94,7 +94,8 @@ exports.createPublicOrder = asyncHandler(async (req, res) => {
   const restaurantId = table.restaurantId;
   const tableNumber = table.tableNumber;
 
-  let status = "PLACED";
+  let status = "PAYMENT_PENDING";
+  let confirmedByWaiter = false;
 
   if (paymentMethod === "CASH") {
     status = "PENDING_CONFIRMATION";
@@ -109,12 +110,14 @@ exports.createPublicOrder = asyncHandler(async (req, res) => {
     orderSource: "QR",
     status,
     estimatedWaitTime,
-    confirmedByWaiter: false,
+    confirmedByWaiter,
   });
 
-  // Emit realtime event to kitchen dashboard (restaurant room)
-  const io = req.app.get("io");
-  io.to(`restaurant_${restaurantId}`).emit("new-order", order);
+  // Emit realtime event to kitchen dashboard only if it's not pending payment
+  if (status !== "PAYMENT_PENDING") {
+    const io = req.app.get("io");
+    io.to(`restaurant_${restaurantId}`).emit("new-order", order);
+  }
 
   res.status(201).json(order);
 });

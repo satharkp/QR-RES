@@ -43,8 +43,8 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    
-     estimatedWaitTime: {
+
+    estimatedWaitTime: {
       type: Number,
       default: 0,
     },
@@ -52,6 +52,7 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
+        "PAYMENT_PENDING",
         "PENDING_CONFIRMATION",
         "PLACED",
         "PREPARING",
@@ -63,7 +64,7 @@ const orderSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["UPI", "CASH"],
+      enum: ["UPI", "CASH", "CARD"],
       required: true,
     },
 
