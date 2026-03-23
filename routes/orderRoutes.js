@@ -13,10 +13,14 @@ const {
   updateOrderStatus,
   confirmOrder,
   getOrderById,
+  serveAllOrders,
 } = require("../controllers/orderController");
 
 // Create order
 router.post("/", checkRestaurantAccess, createOrder);
+
+// Serve all active orders
+router.post("/serve-all", protect, allowRoles("kitchen", "admin"), serveAllOrders);
 
 // Waiter dashboard
 router.get("/waiter", protect, allowRoles("waiter"), getWaiterOrders);
