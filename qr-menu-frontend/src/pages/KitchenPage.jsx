@@ -99,10 +99,6 @@ export default function KitchenPage() {
       });
     });
 
-    socket.on("all-orders-served", () => {
-      setOrders([]);
-    });
-
     return () => socket.disconnect();
   }, []);
 
@@ -111,18 +107,6 @@ export default function KitchenPage() {
       headers: { Authorization: `Bearer ${token}` },
     });
     fetchOrders();
-  };
-  const handleServeAll = async () => {
-    if (!window.confirm("Are you sure you want to mark ALL active orders as served?")) return;
-    try {
-      await axios.post(`${API_BASE}/orders/serve-all`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      fetchOrders();
-    } catch (err) {
-      console.error("Failed to serve all orders", err);
-      alert("Failed to serve all orders");
-    }
   };
 
   const kitchenStats = useMemo(() => {
@@ -171,14 +155,6 @@ export default function KitchenPage() {
                 }`}
             >
               {tvMode ? "Exit TV View" : "Enter TV Model Mode"}
-            </button>
-
-            {/* Serve All Button */}
-            <button
-              onClick={handleServeAll}
-              className={`rounded-3xl font-black uppercase tracking-widest shadow-premium transition-all active:scale-95 bg-red-600 hover:bg-red-700 text-white ${tvMode ? "px-12 py-6 text-xl" : "px-8 py-4 text-xs"}`}
-            >
-              Serve All
             </button>
           </div>
         </div>

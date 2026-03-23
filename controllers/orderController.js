@@ -200,27 +200,3 @@ exports.getOrderById = asyncHandler(async (req, res) => {
 
   res.json(order);
 });
-
-// Serve all active orders
-exports.serveAllOrders = asyncHandler(async (req, res) => {
-  const restaurantId = req.user.restaurantId;
-
-  const result = await Order.updateMany(
-    {
-      restaurantId,
-      status: { $in: ["PLACED", "PREPARING", "READY", "PENDING_CONFIRMATION"] },
-    },
-    { $set: { status: "SERVED" } }
-  );
-
-  // Emit realtime notification to clear dashboards
-  const io = req.app.get("io");
-  io.to(`restaurant_${restaurantId}`).emit("all-orders-served", {
-    count: result.modifiedCount,
-  });
-
-  res.json({
-    message: `Successfully served ${result.modifiedCount} orders`,
-    count: result.modifiedCount,
-  });
-});
