@@ -273,7 +273,10 @@ export default function MenuPage() {
         onPlaceOrder={placeOrder}
       />
 
-      <OrderTracker />
+      <OrderTracker
+        restaurantId={restaurant?.restaurantId}
+        tableNumber={restaurant?.tableNumber}
+      />
 
       {/* GLOBAL PORTION SELECTOR MODAL - Fixes Z-Index Issues */}
       {selectedItemForPortions && (
