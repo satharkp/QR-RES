@@ -43,6 +43,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/restaurants", permanentRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/payments", paymentRoutes);
+
 app.use(notFound);
 app.use(errorHandler);
 
