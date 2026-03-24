@@ -58,17 +58,15 @@ exports.createMenuItem = asyncHandler(async (req, res) => {
   }
 
   const {
-    name,
-    measurementType,
-    price,
-    portions,
     category,
+    description,
     restaurantId,
     prepTime,
   } = validatedData;
 
   const item = await MenuItem.create({
     name,
+    description,
     measurementType,
     price,
     portions,
@@ -149,9 +147,10 @@ exports.updateMenuItem = asyncHandler(async (req, res) => {
     throw new Error("Menu item not found");
   }
 
-  const { name, measurementType, price, portions, category, prepTime, available } = validatedData;
+  const { name, description, measurementType, price, portions, category, prepTime, available } = validatedData;
 
   item.name = name ?? item.name;
+  item.description = description ?? item.description;
   item.measurementType = measurementType ?? item.measurementType;
   item.price = price ?? item.price;
   item.portions = portions ?? item.portions;

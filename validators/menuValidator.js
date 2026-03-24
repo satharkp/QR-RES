@@ -14,6 +14,7 @@ const createMenuItemSchema = z
   .object({
     name: z.string().min(1),
     category: z.string().min(1),
+    description: z.string().optional(),
     restaurantId: z.string().min(1),
 
     measurementType: z.enum(["UNIT", "PORTION"]).default("UNIT"),
@@ -39,7 +40,7 @@ const createMenuItemSchema = z
       (val) => (val === "" || val === undefined ? undefined : Number(val)),
       z.number().int().nonnegative().optional()
     ),
-    
+
   })
   .superRefine((data, ctx) => {
     if (data.measurementType === "UNIT" && data.price == null) {
@@ -66,6 +67,7 @@ const createMenuItemSchema = z
 const updateMenuItemSchema = z.object({
   name: z.string().min(1).optional(),
   category: z.string().min(1).optional(),
+  description: z.string().optional(),
   measurementType: z.enum(["UNIT", "PORTION"]).optional(),
   price: z.number().nonnegative().optional(),
   portions: z.preprocess(

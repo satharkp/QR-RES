@@ -13,6 +13,7 @@ const {
   updateOrderStatus,
   confirmOrder,
   getOrderById,
+  clearAllOrders,
 } = require("../controllers/orderController");
 
 // Create order
@@ -40,5 +41,8 @@ router.patch(
 
 // Confirm order
 router.patch("/:id/confirm", confirmOrder);
+
+// Clear all orders
+router.post("/clear-all", protect, allowRoles("admin"), clearAllOrders);
 
 module.exports = router;

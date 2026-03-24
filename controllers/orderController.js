@@ -200,3 +200,21 @@ exports.getOrderById = asyncHandler(async (req, res) => {
 
   res.json(order);
 });
+// Clear all orders for a restaurant (ADMIN ONLY)
+exports.clearAllOrders = asyncHandler(async (req, res) => {
+  const restaurantId = req.user.restaurantId;
+  
+  if (!restaurantId) {
+    res.status(400);
+    throw new Error("Restaurant ID not found in user session");
+  }
+
+  // Delete all orders for this restaurant
+  await Order.deleteMany({ restaurantId });
+
+  // Optional: Emit event to clear all dashboards
+  const io = req.app.get("io");
+  io.to(`restaurant_${restaurantId}`).emit("all-orders-cleared");
+
+  res.json({ message: "All orders have been cleared successfully" });
+});
