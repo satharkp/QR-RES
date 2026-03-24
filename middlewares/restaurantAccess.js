@@ -2,7 +2,8 @@ const asyncHandler = require("../utils/asyncHandler");
 const Restaurant = require("../models/restaurantModel");
 
 const checkRestaurantAccess = asyncHandler(async (req, res, next) => {
-  const restaurantId = req.body.restaurantId || req.params.restaurantId;
+  const body = req.body || {};
+  const restaurantId = body.restaurantId || req.params.restaurantId;
 
   if (!restaurantId) {
     return res.status(400).json({ message: "restaurantId is required" });

@@ -123,7 +123,25 @@ exports.deleteRestaurantMenu = asyncHandler(async (req, res) => {
 
 // Update menu item
 exports.updateMenuItem = asyncHandler(async (req, res) => {
-  const validatedData = updateMenuItemSchema.parse(req.body);
+  if (!req.body) {
+    return res.status(400).json({ message: "No request body found" });
+  }
+
+  // Handle multipart/form-data portions if sent as string
+  if (req.body.portions && typeof req.body.portions === "string") {
+    try {
+      req.body.portions = JSON.parse(req.body.portions);
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid portions format" });
+    }
+  }
+
+  // Convert numeric fields if sent as strings (FormData case)
+  const body = req.body;
+  if (body.price) body.price = Number(body.price);
+  if (body.prepTime) body.prepTime = Number(body.prepTime);
+
+  const validatedData = updateMenuItemSchema.parse(body);
   const item = await MenuItem.findById(req.params.id);
 
   if (!item) {

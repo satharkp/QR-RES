@@ -51,6 +51,7 @@ router.put(
   "/:id",
   protect,
   allowRoles("admin", "waiter"),
+  upload.single("image"),
   checkRestaurantAccess,
   updateMenuItem
 );
