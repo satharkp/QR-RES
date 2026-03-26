@@ -30,6 +30,29 @@ exports.getMenuByTable = asyncHandler(async (req, res) => {
   });
 });
 
+// GET menu using restaurant ID
+exports.getMenuByRestaurant = asyncHandler(async (req, res) => {
+  const restaurantId = req.params.restaurantId;
+  const restaurant = await Restaurant.findById(restaurantId);
+
+  if (!restaurant) {
+    res.status(404);
+    throw new Error("Restaurant not found");
+  }
+
+  const menu = await MenuItem.find({
+    restaurantId,
+    available: true,
+  });
+
+  res.json({
+    restaurantId,
+    restaurantName: restaurant.name,
+    tableNumber: null, // No specific table when viewing via restaurant ID
+    menu,
+  });
+});
+
 // POST order from QR
 exports.createPublicOrder = asyncHandler(async (req, res) => {
   const { tableId, items, paymentMethod } = req.body;

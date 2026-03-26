@@ -12,7 +12,7 @@ const restaurantSchema = new mongoose.Schema(
     domain: String,
     currency: {
       type: String,
-      default: "GBP",
+      default: "INR",
     },
 
     isActive: {
