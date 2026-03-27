@@ -189,6 +189,32 @@ exports.confirmOrder = asyncHandler(async (req, res) => {
   res.json(order);
 });
 
+// Mark order as paid
+exports.markOrderAsPaid = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Order not found");
+  }
+
+  order.isPaid = true;
+  
+  // If the order was pending confirmation (e.g., QR cash), confirm it as well if marked paid by cashier
+  if (order.status === "PENDING_CONFIRMATION") {
+    order.status = "PLACED";
+    order.confirmedByWaiter = true;
+  }
+
+  await order.save();
+
+  // Emit realtime order update
+  const io = req.app.get("io");
+  io.to(`restaurant_${order.restaurantId}`).emit("order-updated", order);
+
+  res.json(order);
+});
+
 // Get order by ID
 exports.getOrderById = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
@@ -200,6 +226,7 @@ exports.getOrderById = asyncHandler(async (req, res) => {
 
   res.json(order);
 });
+
 // Clear all orders for a restaurant (ADMIN ONLY)
 exports.clearAllOrders = asyncHandler(async (req, res) => {
   const restaurantId = req.user.restaurantId;

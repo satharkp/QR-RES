@@ -12,6 +12,7 @@ const {
   getOrdersByRestaurant,
   updateOrderStatus,
   confirmOrder,
+  markOrderAsPaid,
   getOrderById,
   clearAllOrders,
 } = require("../controllers/orderController");
@@ -28,9 +29,6 @@ router.get("/kitchen", protect, allowRoles("kitchen", "admin"), getKitchenOrders
 // Get orders by restaurant (MUST be before /:id)
 router.get("/restaurant/:restaurantId", getOrdersByRestaurant);
 
-// Get order by ID
-router.get("/:id", getOrderById);
-
 // Update status
 router.patch(
   "/:id/status",
@@ -41,6 +39,12 @@ router.patch(
 
 // Confirm order
 router.patch("/:id/confirm", confirmOrder);
+
+// Mark as paid (CASHIER)
+router.patch("/pay/:id", protect, allowRoles("admin", "waiter"), markOrderAsPaid);
+
+// Get order by ID (Generic route at the bottom)
+router.get("/:id", getOrderById);
 
 // Clear all orders
 router.post("/clear-all", protect, allowRoles("admin"), clearAllOrders);

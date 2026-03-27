@@ -50,6 +50,7 @@ exports.verifyPayment = async (req, res) => {
     }
 
     dbOrder.status = "PLACED";
+    dbOrder.isPaid = true;
     dbOrder.confirmedByWaiter = true; // For online payments, we auto-confirm for kitchen
 
     // Store razorpay details for reference
