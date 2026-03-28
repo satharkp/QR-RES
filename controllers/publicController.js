@@ -26,6 +26,7 @@ exports.getMenuByTable = asyncHandler(async (req, res) => {
     restaurantId: table.restaurantId,
     restaurantName: restaurant ? restaurant.name : "Greenleaf Dining",
     tableNumber: table.tableNumber,
+    settings: restaurant?.settings,
     menu,
   });
 });
@@ -49,6 +50,7 @@ exports.getMenuByRestaurant = asyncHandler(async (req, res) => {
     restaurantId,
     restaurantName: restaurant.name,
     tableNumber: null, // No specific table when viewing via restaurant ID
+    settings: restaurant.settings,
     menu,
   });
 });

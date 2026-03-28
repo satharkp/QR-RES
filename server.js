@@ -18,7 +18,9 @@ const authRoutes = require("./routes/authRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const permanentRoutes = require("./routes/permantD");
 const analyticsRoutes = require("./routes/analyticsRoutes");
-const paymentRoutes = require("./routes/paymentRoutes")
+const paymentRoutes = require("./routes/paymentRoutes");
+const settingsRoutes = require("./routes/settingsRoutes");
+const superAdminRoutes = require("./routes/superAdminRoutes");
 
 
 const app = express();
@@ -46,6 +48,8 @@ app.use("/api/restaurants", permanentRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/super", superAdminRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
