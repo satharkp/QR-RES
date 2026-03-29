@@ -11,6 +11,9 @@ const {
   clearWaiterTables,
   deleteWaiter,
   getMyAssignedTables,
+  createStaff,
+  getStaff,
+  deleteStaff,
 
 } = require("../controllers/userController");
 
@@ -20,5 +23,8 @@ router.patch("/waiters/:id/tables", protect, allowRoles("admin"), assignTablesTo
 router.patch("/waiters/:id/clear-tables",protect, allowRoles ("admin"), clearWaiterTables);
 router.delete("/waiters/:id", protect, allowRoles("admin"), deleteWaiter );
 router.get("/waiter/me/tables", protect, allowRoles("waiter"), getMyAssignedTables );
+router.post("/staff", protect, allowRoles("admin"), createStaff);
+router.get("/staff", protect, allowRoles("admin"), getStaff);
+router.delete("/staff/:id", protect, allowRoles("admin"), deleteStaff);
 
 module.exports = router;

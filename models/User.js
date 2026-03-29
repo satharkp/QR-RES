@@ -24,7 +24,11 @@ const userSchema = new mongoose.Schema(
       ref: "Restaurant",
       required: true,
     },
-
+    isMainAdmin: {
+      type: Boolean,
+      default: false,
+    },
+  
     assignedTables: [
       {
         type: mongoose.Schema.Types.ObjectId,

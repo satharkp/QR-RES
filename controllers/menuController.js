@@ -23,6 +23,16 @@ exports.createMenuItem = asyncHandler(async (req, res) => {
   if (req.body.prepTime) req.body.prepTime = Number(req.body.prepTime);
   const validatedData = createMenuItemSchema.parse(req.body);
 
+  const {
+    name,
+    description,
+    measurementType,
+    price,
+    portions,
+    category,
+    prepTime,
+  } = validatedData;
+
   // Business validation for measurement type
   if (validatedData.measurementType === "UNIT") {
     if (!validatedData.price) {
@@ -57,12 +67,10 @@ exports.createMenuItem = asyncHandler(async (req, res) => {
     validatedData.price = undefined;
   }
 
-  const {
-    category,
-    description,
-    restaurantId,
-    prepTime,
-  } = validatedData;
+  const restaurantId = req.user?.restaurantId;
+  if (!restaurantId) {
+    return res.status(400).json({ message: "Restaurant ID missing in token" });
+  }
 
   const item = await MenuItem.create({
     name,
@@ -85,7 +93,8 @@ exports.createMenuItem = asyncHandler(async (req, res) => {
 
 // Get menu by restaurant
 exports.getMenuByRestaurant = asyncHandler(async (req, res) => {
-  const items = await MenuItem.find({ restaurantId: req.params.restaurantId });
+  const restaurantId = req.user?.restaurantId || req.params.restaurantId;
+  const items = await MenuItem.find({ restaurantId });
   res.json(items);
 });
 

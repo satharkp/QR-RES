@@ -1,4 +1,6 @@
 const Restaurant = require("../models/restaurantModel");
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
 const asyncHandler = require("../utils/asyncHandler");
 
 // GET all restaurants with basic stats
@@ -11,10 +13,10 @@ exports.getAllRestaurants = asyncHandler(async (req, res) => {
  * POST create a new restaurant (super admin)
  */
 exports.createRestaurant = asyncHandler(async (req, res) => {
-  const { name, domain, currency } = req.body;
+  const { name, domain, currency, adminEmail, adminPassword } = req.body;
 
-  if (!name || !domain) {
-    return res.status(400).json({ message: "Name and domain are required" });
+  if (!name || !domain || !adminEmail || !adminPassword) {
+    return res.status(400).json({ message: "All fields are required" });
   }
 
   const exists = await Restaurant.findOne({ domain });
@@ -30,7 +32,21 @@ exports.createRestaurant = asyncHandler(async (req, res) => {
     subscriptionStatus: "ACTIVE",
   });
 
-  res.status(201).json({ message: "Restaurant created", restaurant });
+  const hashed = await bcrypt.hash(adminPassword, 10);
+
+  const admin = await User.create({
+    email: adminEmail,
+    password: hashed,
+    role: "admin",
+    restaurantId: restaurant._id,
+    isMainAdmin: true,
+  });
+
+  res.status(201).json({
+    message: "Restaurant and admin created",
+    restaurant,
+    admin,
+  });
 });
 
 // PATCH toggle isActive
