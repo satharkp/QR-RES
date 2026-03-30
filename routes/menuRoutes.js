@@ -5,6 +5,7 @@ const protect = require("../middlewares/authMiddleware");
 const allowRoles = require("../middlewares/roleMiddleware");
 const checkRestaurantAccess = require("../middlewares/restaurantAccess");
 const upload = require("../middlewares/uploadMiddleware");
+const checkRestaurantActive = require("../middlewares/checkRestaurantActive");
 
 const {
   createMenuItem,
@@ -19,6 +20,7 @@ const {
 router.post(
   "/",
   protect,
+  checkRestaurantActive,
   allowRoles("admin", "waiter"),
   upload.single("image"),
   checkRestaurantAccess,
@@ -32,6 +34,7 @@ router.get("/:restaurantId", getMenuByRestaurant);
 router.delete(
   "/item/:id",
   protect,
+  checkRestaurantActive,
   allowRoles("admin", "waiter"),
   checkRestaurantAccess,
   deleteMenuItem
@@ -41,6 +44,7 @@ router.delete(
 router.delete(
   "/",
   protect,
+  checkRestaurantActive,
   allowRoles("admin"),
   checkRestaurantAccess,
   deleteRestaurantMenu
@@ -50,6 +54,7 @@ router.delete(
 router.put(
   "/:id",
   protect,
+  checkRestaurantActive,
   allowRoles("admin", "waiter"),
   upload.single("image"),
   checkRestaurantAccess,
@@ -60,6 +65,7 @@ router.put(
 router.patch(
   "/:id/availability",
   protect,
+  checkRestaurantActive,
   allowRoles("admin", "waiter"),
   checkRestaurantAccess,
   toggleAvailability

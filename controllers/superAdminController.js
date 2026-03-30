@@ -1,12 +1,48 @@
 const Restaurant = require("../models/restaurantModel");
 const User = require("../models/User");
+const Order = require("../models/Order");
 const bcrypt = require("bcryptjs");
 const asyncHandler = require("../utils/asyncHandler");
 
-// GET all restaurants with basic stats
+// GET all restaurants with stats: totalOrders and totalRevenue
 exports.getAllRestaurants = asyncHandler(async (req, res) => {
   const restaurants = await Restaurant.find().sort({ createdAt: -1 }).lean();
-  res.json({ data: restaurants });
+
+  // 🔥 Aggregate order stats
+  const stats = await Order.aggregate([
+    {
+      $group: {
+        _id: "$restaurantId",
+        totalOrders: { $sum: 1 },
+        totalRevenue: { $sum: "$total" },
+      },
+    },
+  ]);
+
+  // Convert stats array to map for quick lookup
+  const statsMap = {};
+  stats.forEach((s) => {
+    statsMap[s._id.toString()] = {
+      totalOrders: s.totalOrders,
+      totalRevenue: s.totalRevenue,
+    };
+  });
+
+  // Merge stats into restaurants
+  const enriched = restaurants.map((r) => {
+    const stat = statsMap[r._id.toString()] || {
+      totalOrders: 0,
+      totalRevenue: 0,
+    };
+
+    return {
+      ...r,
+      totalOrders: stat.totalOrders,
+      totalRevenue: stat.totalRevenue,
+    };
+  });
+
+  res.json({ data: enriched });
 });
 
 /**
@@ -77,11 +113,23 @@ exports.updateSubscription = asyncHandler(async (req, res) => {
   res.json({ message: "Subscription updated", subscriptionStatus: restaurant.subscriptionStatus });
 });
 
-// DELETE a restaurant (cascade handled by mongoose pre-hook on model)
+// DELETE a restaurant with full cleanup
 exports.deleteRestaurant = asyncHandler(async (req, res) => {
-  const restaurant = await Restaurant.findById(req.params.id);
-  if (!restaurant) return res.status(404).json({ message: "Restaurant not found" });
+  const { id } = req.params;
 
+  const restaurant = await Restaurant.findById(id);
+  if (!restaurant) {
+    return res.status(404).json({ message: "Restaurant not found" });
+  }
+
+  // 🔥 Delete all users linked to this restaurant
+  await User.deleteMany({ restaurantId: id });
+
+  // 🔥 Delete all orders linked to this restaurant
+  await Order.deleteMany({ restaurantId: id });
+
+  // 🔥 Delete restaurant itself
   await restaurant.deleteOne();
-  res.json({ message: "Restaurant deleted successfully" });
+
+  res.json({ message: "Restaurant and all related data deleted successfully" });
 });

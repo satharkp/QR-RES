@@ -21,6 +21,7 @@ const analyticsRoutes = require("./routes/analyticsRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 const superAdminRoutes = require("./routes/superAdminRoutes");
+const ratingRoutes = require("./routes/ratingRoutes");
 
 
 const app = express();
@@ -50,6 +51,7 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/super", superAdminRoutes);
+app.use("/api/ratings", ratingRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
