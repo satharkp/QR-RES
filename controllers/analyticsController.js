@@ -105,6 +105,11 @@ exports.getPopularItems = asyncHandler(async (req, res) => {
       $group: {
         _id: "$items.name",
         count: { $sum: "$items.quantity" },
+        revenue: {
+          $sum: {
+            $multiply: ["$items.price", "$items.quantity"],
+          },
+        },
       },
     },
     { $sort: { count: -1 } },
