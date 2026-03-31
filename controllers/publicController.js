@@ -19,7 +19,6 @@ exports.getMenuByTable = asyncHandler(async (req, res) => {
 
   const menu = await MenuItem.find({
     restaurantId: table.restaurantId,
-    available: true,
   });
 
   res.json({
@@ -43,7 +42,6 @@ exports.getMenuByRestaurant = asyncHandler(async (req, res) => {
 
   const menu = await MenuItem.find({
     restaurantId,
-    available: true,
   });
 
   res.json({

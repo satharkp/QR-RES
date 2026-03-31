@@ -1,4 +1,5 @@
 const MenuItem = require("../models/MenuItem");
+const mongoose = require("mongoose");
 const asyncHandler = require("../utils/asyncHandler");
 const {
   createMenuItemSchema,
@@ -100,7 +101,10 @@ exports.getMenuByRestaurant = asyncHandler(async (req, res) => {
 
 // Delete menu item
 exports.deleteMenuItem = asyncHandler(async (req, res) => {
-  const item = await MenuItem.findById(req.params.id);
+  const item = await MenuItem.findOne({
+    _id: req.params.id,
+    restaurantId: req.user.restaurantId,
+  });
 
   if (!item) {
     res.status(404);
@@ -149,7 +153,10 @@ exports.updateMenuItem = asyncHandler(async (req, res) => {
   if (body.prepTime) body.prepTime = Number(body.prepTime);
 
   const validatedData = updateMenuItemSchema.parse(body);
-  const item = await MenuItem.findById(req.params.id);
+  const item = await MenuItem.findOne({
+    _id: req.params.id,
+    restaurantId: req.user.restaurantId,
+  });
 
   if (!item) {
     res.status(404);
@@ -179,23 +186,27 @@ exports.updateMenuItem = asyncHandler(async (req, res) => {
 
 // Toggle availability
 exports.toggleAvailability = asyncHandler(async (req, res) => {
+  console.log("USER:", req.user);
+
+  if (!["admin", "kitchen"].includes(req.user.role)) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
   const item = await MenuItem.findById(req.params.id);
 
-  if (!item) {
-    res.status(404);
-    throw new Error("Menu item not found");
+  // 👇 ADD LOGS HERE (BEST PLACE)
+  console.log("ITEM REST:", item?.restaurantId);
+  console.log("USER REST:", req.user.restaurantId);
+
+  if (!item || item.restaurantId.toString() !== req.user.restaurantId.toString()) {
+    return res.status(403).json({ message: "Not allowed" });
   }
 
   item.available = !item.available;
   await item.save();
 
-  // Emit realtime event
   const io = req.app.get("io");
   io.to(`restaurant_${item.restaurantId}`).emit("menu-item-updated", item);
 
-  res.json({
-    message: "Availability updated",
-    available: item.available,
-    item,
-  });
+  res.json(item);
 });

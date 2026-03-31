@@ -21,7 +21,7 @@ router.post(
   "/",
   protect,
   checkRestaurantActive,
-  allowRoles("admin", "waiter"),
+  allowRoles("admin", "waiter", "kitchen"),
   upload.single("image"),
   checkRestaurantAccess,
   createMenuItem
@@ -35,7 +35,7 @@ router.delete(
   "/item/:id",
   protect,
   checkRestaurantActive,
-  allowRoles("admin", "waiter"),
+  allowRoles("admin", "waiter", "kitchen"),
   checkRestaurantAccess,
   deleteMenuItem
 );
@@ -55,20 +55,14 @@ router.put(
   "/:id",
   protect,
   checkRestaurantActive,
-  allowRoles("admin", "waiter"),
+  allowRoles("admin", "waiter", "kitchen"),
   upload.single("image"),
   checkRestaurantAccess,
   updateMenuItem
 );
 
 // Toggle availability
-router.patch(
-  "/:id/availability",
-  protect,
-  checkRestaurantActive,
-  allowRoles("admin", "waiter"),
-  checkRestaurantAccess,
-  toggleAvailability
-);
+router.patch( "/:id/availability", protect, checkRestaurantActive, allowRoles("admin", "kitchen"),
+checkRestaurantAccess,toggleAvailability);
 
 module.exports = router;

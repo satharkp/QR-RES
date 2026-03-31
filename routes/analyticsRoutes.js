@@ -4,6 +4,7 @@ const {
   getOverviewStats,
   getPopularItems,
   getOperationalStats,
+  getTrends,
 } = require("../controllers/analyticsController");
 const authMiddleware = require("../middlewares/authMiddleware");
 
@@ -13,5 +14,6 @@ router.use(authMiddleware);
 router.get("/overview", getOverviewStats);
 router.get("/popular-items", getPopularItems);
 router.get("/operational", getOperationalStats);
+router.get("/trends", getTrends);
 
 module.exports = router;

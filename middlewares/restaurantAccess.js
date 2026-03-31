@@ -3,7 +3,7 @@ const Restaurant = require("../models/restaurantModel");
 
 const checkRestaurantAccess = asyncHandler(async (req, res, next) => {
   const body = req.body || {};
-  const restaurantId = body.restaurantId || req.params.restaurantId;
+  const restaurantId = body.restaurantId || req.params.restaurantId || req.user?.restaurantId;
 
   if (!restaurantId) {
     return res.status(400).json({ message: "restaurantId is required" });

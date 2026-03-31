@@ -3,12 +3,50 @@ const MenuItem = require("../models/MenuItem");
 const asyncHandler = require("../utils/asyncHandler");
 const mongoose = require("mongoose");
 
+const getDateFilter = (query) => {
+  const { range, from, to } = query;
+
+  if (range === "today") {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    return { $gte: start };
+  }
+
+  if (range === "7d") {
+    const start = new Date();
+    start.setDate(start.getDate() - 7);
+    return { $gte: start };
+  }
+
+  if (range === "30d") {
+    const start = new Date();
+    start.setDate(start.getDate() - 30);
+    return { $gte: start };
+  }
+
+  if (range === "custom" && from && to) {
+    return {
+      $gte: new Date(from),
+      $lte: new Date(to),
+    };
+  }
+
+  return {}; // no filter
+};
+
 // Get overview stats: total revenue, order count, avg order value
 exports.getOverviewStats = asyncHandler(async (req, res) => {
   const restaurantId = req.user.restaurantId;
+  const dateFilter = getDateFilter(req.query);
 
   const stats = await Order.aggregate([
-    { $match: { restaurantId: new mongoose.Types.ObjectId(restaurantId), status: { $ne: "PAYMENT_PENDING" } } },
+    {
+      $match: {
+        restaurantId: new mongoose.Types.ObjectId(restaurantId),
+        status: { $ne: "PAYMENT_PENDING" },
+        ...(Object.keys(dateFilter).length && { createdAt: dateFilter }),
+      },
+    },
     {
       $group: {
         _id: null,
@@ -52,19 +90,24 @@ exports.getOverviewStats = asyncHandler(async (req, res) => {
 // Get top 5 popular items
 exports.getPopularItems = asyncHandler(async (req, res) => {
   const restaurantId = req.user.restaurantId;
+  const dateFilter = getDateFilter(req.query);
 
   const popular = await Order.aggregate([
-    { $match: { restaurantId: new mongoose.Types.ObjectId(restaurantId), status: { $ne: "PAYMENT_PENDING" } } },
+    {
+      $match: {
+        restaurantId: new mongoose.Types.ObjectId(restaurantId),
+        status: { $ne: "PAYMENT_PENDING" },
+        ...(Object.keys(dateFilter).length && { createdAt: dateFilter }),
+      },
+    },
     { $unwind: "$items" },
     {
       $group: {
-        _id: "$items.menuItemId",
-        name: { $first: "$items.name" },
-        quantitySold: { $sum: "$items.quantity" },
-        revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
+        _id: "$items.name",
+        count: { $sum: "$items.quantity" },
       },
     },
-    { $sort: { quantitySold: -1 } },
+    { $sort: { count: -1 } },
     { $limit: 5 },
   ]);
 
@@ -99,4 +142,31 @@ exports.getOperationalStats = asyncHandler(async (req, res) => {
     sources: sourceStats,
     statuses: statusStats,
   });
+});
+
+exports.getTrends = asyncHandler(async (req, res) => {
+  const restaurantId = req.user.restaurantId;
+  const dateFilter = getDateFilter(req.query);
+
+  const trends = await Order.aggregate([
+    {
+      $match: {
+        restaurantId: new mongoose.Types.ObjectId(restaurantId),
+        status: { $ne: "PAYMENT_PENDING" },
+        ...(Object.keys(dateFilter).length && { createdAt: dateFilter }),
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+        },
+        revenue: { $sum: "$total" },
+        orders: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+
+  res.json(trends);
 });
