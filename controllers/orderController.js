@@ -14,8 +14,12 @@ exports.createOrder = asyncHandler(async (req, res) => {
 
   let status = "PLACED";
 
-  if (orderSource === "QR" && paymentMethod === "CASH") {
-    status = "PENDING_CONFIRMATION";
+  if (orderSource === "QR") {
+    if (paymentMethod === "CASH") {
+      status = "PENDING_CONFIRMATION";
+    } else {
+      status = "PAYMENT_PENDING";
+    }
   }
 
   // Validate menu items belong to restaurant
@@ -76,8 +80,14 @@ exports.createOrder = asyncHandler(async (req, res) => {
   });
 
   // Emit realtime event for kitchen dashboards
-  const io = req.app.get("io");
-  io.to(`restaurant_${restaurantId}`).emit("new-order", order);
+  // ONLY for confirmed orders (PLACED) or cash requests (PENDING_CONFIRMATION)
+  if (status !== "PAYMENT_PENDING") {
+    // Populate restaurantId before emitting to ensure name/settings are available on receipt
+    await order.populate("restaurantId", "name settings");
+    
+    const io = req.app.get("io");
+    io.to(`restaurant_${restaurantId}`).emit("new-order", order);
+  }
 
   res.status(201).json(order);
 });
@@ -115,7 +125,9 @@ exports.getKitchenOrders = asyncHandler(async (req, res) => {
 exports.getOrdersByRestaurant = asyncHandler(async (req, res) => {
   const orders = await Order.find({
     restaurantId: req.params.restaurantId,
-  }).sort({ createdAt: -1 });
+  })
+    .populate("restaurantId", "name settings")
+    .sort({ createdAt: -1 });
 
   res.json(orders);
 });
@@ -154,10 +166,11 @@ exports.updateOrderStatus = asyncHandler(async (req, res) => {
   }
 
   await order.save();
-
-  // Emit realtime order update
+  
+  // Populate before emission to ensure name/settings are available on receipt
+  await order.populate("restaurantId", "name settings");
   const io = req.app.get("io");
-  io.to(`restaurant_${order.restaurantId}`).emit("order-updated", order);
+  io.to(`restaurant_${order.restaurantId._id || order.restaurantId}`).emit("order-updated", order);
 
   res.json(order);
 });
@@ -183,8 +196,9 @@ exports.confirmOrder = asyncHandler(async (req, res) => {
   await order.save();
 
   // Emit confirmation update
+  await order.populate("restaurantId", "name settings");
   const io = req.app.get("io");
-  io.to(`restaurant_${order.restaurantId}`).emit("order-updated", order);
+  io.to(`restaurant_${order.restaurantId._id || order.restaurantId}`).emit("order-updated", order);
 
   res.json(order);
 });
@@ -207,17 +221,19 @@ exports.markOrderAsPaid = asyncHandler(async (req, res) => {
   }
 
   await order.save();
-
+  
   // Emit realtime order update
+  // Populate before emission to ensure name/settings are available on receipt
+  await order.populate("restaurantId", "name settings");
   const io = req.app.get("io");
-  io.to(`restaurant_${order.restaurantId}`).emit("order-updated", order);
+  io.to(`restaurant_${order.restaurantId._id || order.restaurantId}`).emit("order-updated", order);
 
   res.json(order);
 });
 
 // Get order by ID
 exports.getOrderById = asyncHandler(async (req, res) => {
-  const order = await Order.findById(req.params.id);
+  const order = await Order.findById(req.params.id).populate("restaurantId", "name settings");
 
   if (!order) {
     res.status(404);

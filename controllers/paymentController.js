@@ -59,9 +59,12 @@ exports.verifyPayment = async (req, res) => {
 
     await dbOrder.save();
 
+    // Populate restaurantId before emitting to ensure name/settings are available on receipt
+    await dbOrder.populate("restaurantId", "name settings");
+
     // Emit realtime event for kitchen dashboards now that payment is confirmed
     const io = req.app.get("io");
-    io.to(`restaurant_${dbOrder.restaurantId}`).emit("new-order", dbOrder);
+    io.to(`restaurant_${dbOrder.restaurantId._id || dbOrder.restaurantId}`).emit("new-order", dbOrder);
 
     res.status(200).json({ message: "Payment verified successfully", order: dbOrder });
   } catch (error) {

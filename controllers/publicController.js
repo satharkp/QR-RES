@@ -138,8 +138,12 @@ exports.createPublicOrder = asyncHandler(async (req, res) => {
 
   // Emit realtime event to kitchen dashboard only if it's not pending payment
   if (status !== "PAYMENT_PENDING") {
+    await order.populate("restaurantId", "name settings");
     const io = req.app.get("io");
     io.to(`restaurant_${restaurantId}`).emit("new-order", order);
+  } else {
+    // Even if payment pending, we should return populated order for the bill copy
+    await order.populate("restaurantId", "name settings");
   }
 
   res.status(201).json(order);
