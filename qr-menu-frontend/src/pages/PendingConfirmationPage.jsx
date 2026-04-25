@@ -15,7 +15,7 @@ export default function PendingConfirmationPage() {
   const [currency, setCurrency] = useState('₹');
 
   useEffect(() => {
-    fetchSettings().then(s => { if (s?.currency) setCurrency(s.currency); }).catch(() => {});
+    fetchSettings().then(s => { if (s?.currency) setCurrency(s.currency); }).catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function PendingConfirmationPage() {
     if (!order) return;
     const printWindow = window.open('', '_blank');
     const restaurantName = order.restaurantId?.name || "Restaurant";
-    
+
     const content = `
       <html>
         <head>
@@ -138,7 +138,7 @@ export default function PendingConfirmationPage() {
     printWindow.document.write(content);
     printWindow.document.close();
     printWindow.focus();
-    
+
     setTimeout(() => {
       printWindow.print();
       printWindow.close();
@@ -216,7 +216,7 @@ export default function PendingConfirmationPage() {
             <span className="w-1.5 h-1.5 bg-greenleaf-primary rounded-full"></span>
             Your Curation
           </h2>
-          <button 
+          <button
             onClick={printBill}
             className="absolute top-5 right-5 md:top-8 md:right-8 bg-white border border-greenleaf-accent hover:border-greenleaf-primary text-greenleaf-primary px-3 py-1.5 rounded-xl text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm flex items-center gap-1.5"
           >

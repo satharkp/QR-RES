@@ -73,7 +73,7 @@ export default function WaiterPage() {
   useEffect(() => {
     fetchAssignedTables();
     loadNotifications();
-    fetchSettings().then(s => { if (s?.currency) setCurrency(s.currency); }).catch(() => {});
+    fetchSettings().then(s => { if (s?.currency) setCurrency(s.currency); }).catch(() => { });
     const interval = setInterval(() => {
       fetchAssignedTables();
       loadNotifications();
@@ -482,13 +482,13 @@ export default function WaiterPage() {
               <div className="space-y-6">
                 {/* Order Type Toggle for Waiter */}
                 <div className="bg-greenleaf-bg p-2 rounded-2xl border border-greenleaf-accent flex gap-2">
-                  <button 
+                  <button
                     onClick={() => setOrderType("DINE_IN")}
                     className={`flex-1 py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${orderType === "DINE_IN" ? "bg-greenleaf-primary text-white shadow-lg" : "text-greenleaf-muted hover:bg-white"}`}
                   >
                     🍽️ Dine-In
                   </button>
-                  <button 
+                  <button
                     onClick={() => setOrderType("TAKEAWAY")}
                     className={`flex-1 py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${orderType === "TAKEAWAY" ? "bg-purple-600 text-white shadow-lg" : "text-greenleaf-muted hover:bg-white"}`}
                   >
@@ -497,44 +497,44 @@ export default function WaiterPage() {
                 </div>
 
                 <div className="space-y-4">
-                <h3 className="font-serif text-xl border-b pb-2">Top Menu Items</h3>
-                <div className="grid grid-cols-1 gap-3">
-                  {menu.map(item => (
-                    <button
-                      key={item._id}
-                      onClick={() => {
-                        if (item.measurementType === 'PORTION' && item.portions?.length > 0) {
-                          setSelectedItemForPortion(item);
-                        } else {
-                          addToCart(item);
-                        }
-                      }}
-                      className="group flex justify-between items-center p-4 rounded-2xl border border-greenleaf-accent hover:border-greenleaf-primary transition-all hover:bg-greenleaf-accent/30 text-left"
-                    >
-                      <div className="flex-1">
-                        <p className="font-bold text-greenleaf-text">{item.name}</p>
-                        {item.measurementType === 'PORTION' ? (
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {item.portions.map((p, idx) => (
-                              <span key={idx} className="text-[10px] bg-greenleaf-accent px-2 py-0.5 rounded-full font-bold text-greenleaf-primary">
-                                {p.label}: {currency}{p.price}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-xs text-greenleaf-muted font-bold">{currency}{item.price}</p>
-                        )}
-                      </div>
-                      <span className="bg-greenleaf-accent p-2 rounded-xl text-greenleaf-primary group-hover:bg-greenleaf-primary group-hover:text-white transition-colors ml-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                      </span>
-                    </button>
-                  ))}
+                  <h3 className="font-serif text-xl border-b pb-2">Top Menu Items</h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    {menu.map(item => (
+                      <button
+                        key={item._id}
+                        onClick={() => {
+                          if (item.measurementType === 'PORTION' && item.portions?.length > 0) {
+                            setSelectedItemForPortion(item);
+                          } else {
+                            addToCart(item);
+                          }
+                        }}
+                        className="group flex justify-between items-center p-4 rounded-2xl border border-greenleaf-accent hover:border-greenleaf-primary transition-all hover:bg-greenleaf-accent/30 text-left"
+                      >
+                        <div className="flex-1">
+                          <p className="font-bold text-greenleaf-text">{item.name}</p>
+                          {item.measurementType === 'PORTION' ? (
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {item.portions.map((p, idx) => (
+                                <span key={idx} className="text-[10px] bg-greenleaf-accent px-2 py-0.5 rounded-full font-bold text-greenleaf-primary">
+                                  {p.label}: {currency}{p.price}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-greenleaf-muted font-bold">{currency}{item.price}</p>
+                          )}
+                        </div>
+                        <span className="bg-greenleaf-accent p-2 rounded-xl text-greenleaf-primary group-hover:bg-greenleaf-primary group-hover:text-white transition-colors ml-4">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-4">
+              <div className="space-y-4">
                 <h3 className="font-serif text-xl border-b pb-2">Current Tray</h3>
                 {cart.length === 0 ? (
                   <p className="text-greenleaf-muted italic text-sm">Tray is empty</p>

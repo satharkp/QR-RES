@@ -158,9 +158,9 @@ export default function KitchenPage() {
   const toggleAvailability = async (itemId) => {
     try {
       await axios.patch(`${API_BASE}/menu/${itemId}/availability`, {}, {
-        
+
         headers: { Authorization: `Bearer ${token}` },
-        
+
       });
       fetchMenuItems();
     } catch (err) {
@@ -314,8 +314,8 @@ export default function KitchenPage() {
                         key={item._id}
                         onClick={() => toggleAvailability(item._id)}
                         className={`group flex items-center justify-between p-5 rounded-2xl border-2 transition-all active:scale-[0.98] ${item.available
-                            ? (tvMode ? "bg-green-500/10 border-green-500/30" : "bg-green-50 border-green-100 shadow-sm hover:shadow-md")
-                            : (tvMode ? "bg-red-500/10 border-red-500/30 opacity-60 grayscale" : "bg-red-50 border-red-100 opacity-80 grayscale-[0.5]")
+                          ? (tvMode ? "bg-green-500/10 border-green-500/30" : "bg-green-50 border-green-100 shadow-sm hover:shadow-md")
+                          : (tvMode ? "bg-red-500/10 border-red-500/30 opacity-60 grayscale" : "bg-red-50 border-red-100 opacity-80 grayscale-[0.5]")
                           }`}
                       >
                         <div className="text-left">
