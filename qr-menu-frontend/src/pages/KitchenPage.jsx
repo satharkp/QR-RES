@@ -355,7 +355,12 @@ export default function KitchenPage() {
                     {/* Order Ticket Header */}
                     <div className={`p-8 border-b flex justify-between items-center ${tvMode ? "bg-white/10 border-white/20" : "bg-greenleaf-accent border-greenleaf-accent"}`}>
                       <div>
-                        <span className={`font-black uppercase tracking-[0.2em] opacity-60 ${tvMode ? "text-lg" : "text-[10px]"}`}>Table Identification</span>
+                        <div className="flex items-center gap-3 mb-1">
+                          <span className={`font-black uppercase tracking-[0.2em] opacity-60 ${tvMode ? "text-lg" : "text-[10px]"}`}>Table Identification</span>
+                          {order.orderType === "TAKEAWAY" && (
+                            <span className={`bg-purple-100 text-purple-700 font-black uppercase tracking-widest rounded-full ${tvMode ? "text-xl px-4 py-1" : "text-[8px] px-2 py-0.5 border border-purple-200"}`}>🛍️ Takeaway</span>
+                          )}
+                        </div>
                         <p className={`font-serif font-black ${tvMode ? "text-7xl text-greenleaf-secondary" : "text-4xl text-greenleaf-primary"}`}>
                           #{order.tableNumber}
                         </p>

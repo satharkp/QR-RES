@@ -55,7 +55,7 @@ exports.getMenuByRestaurant = asyncHandler(async (req, res) => {
 
 // POST order from QR
 exports.createPublicOrder = asyncHandler(async (req, res) => {
-  const { tableId, items, paymentMethod } = req.body;
+  const { tableId, items, paymentMethod, orderType } = req.body;
 
   const table = await Table.findById(tableId);
 
@@ -130,6 +130,7 @@ exports.createPublicOrder = asyncHandler(async (req, res) => {
     items,
     total: calculatedTotal,
     paymentMethod,
+    orderType: orderType || "DINE_IN",
     orderSource: "QR",
     status,
     estimatedWaitTime,

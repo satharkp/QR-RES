@@ -10,7 +10,7 @@ const { validateOrderItems } = require("../utils/orderValidation");
 exports.createOrder = asyncHandler(async (req, res) => {
   createOrderSchema.parse(req.body);
 
-  const { restaurantId, tableNumber, items, paymentMethod, orderSource } = req.body;
+  const { restaurantId, tableNumber, items, paymentMethod, orderType, orderSource } = req.body;
 
   let status = "PLACED";
 
@@ -73,6 +73,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
     items: formattedItems,
     total: calculatedTotal,
     paymentMethod,
+    orderType: orderType || "DINE_IN",
     orderSource,
     status,
     estimatedWaitTime,

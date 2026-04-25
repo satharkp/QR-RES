@@ -112,6 +112,7 @@ export default function PendingConfirmationPage() {
           <div class="details">
             <div>Order ID: #` + order._id.substring(order._id.length - 6).toUpperCase() + `</div>
             <div>Table: ` + order.tableNumber + `</div>
+            <div style="font-weight: bold; margin: 5px 0;">Type: ` + (order.orderType === "TAKEAWAY" ? "TAKEAWAY" : "DINE-IN") + `</div>
             <div>Date: ` + new Date(order.createdAt).toLocaleString() + `</div>
             <div>Status: ` + (order.isPaid ? 'PAID' : 'UNPAID') + `</div>
           </div>
@@ -183,6 +184,17 @@ export default function PendingConfirmationPage() {
             Order Received
           </h1>
           <p className="text-[8px] md:text-[10px] uppercase font-black tracking-widest text-greenleaf-muted mt-1 md:mt-2">Currently being processed</p>
+          <div className="mt-4 flex justify-center">
+            {order?.orderType === "TAKEAWAY" ? (
+              <span className="bg-purple-100 text-purple-700 font-black uppercase text-[10px] px-4 py-1.5 rounded-full border border-purple-200 shadow-sm flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2">
+                <span>🛍️</span> Takeaway Order
+              </span>
+            ) : (
+              <span className="bg-blue-50 text-blue-700 font-black uppercase text-[10px] px-4 py-1.5 rounded-full border border-blue-100 shadow-sm flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2">
+                <span>🍽️</span> Dine-In Order
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Wait Time Display */}

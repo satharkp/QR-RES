@@ -74,6 +74,12 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+    orderType: {
+      type: String,
+      enum: ["DINE_IN", "TAKEAWAY"],
+      default: "DINE_IN",
+    },
+
     confirmedByWaiter: {
       type: Boolean,
       default: false,

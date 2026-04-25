@@ -17,6 +17,7 @@ Base order schema
 const baseOrderSchema = z.object({
   items: orderItemsSchema,
   paymentMethod: z.enum(["CASH", "UPI", "CARD"]),
+  orderType: z.enum(["DINE_IN", "TAKEAWAY"]).optional(),
 });
 
 /*
