@@ -10,10 +10,14 @@ exports.getSettings = asyncHandler(async (req, res) => {
     throw new Error("Restaurant not found");
   }
 
-  // Return settings and name
+  // Return settings, name, and subscription details
   res.json({
     ...(restaurant.settings ? restaurant.settings.toObject() : {}),
-    name: restaurant.name
+    name: restaurant.name,
+    subscriptionStatus: restaurant.subscriptionStatus,
+    subscriptionEndsAt: restaurant.subscriptionEndsAt,
+    trialEndsAt: restaurant.trialEndsAt,
+    createdAt: restaurant.createdAt
   });
 });
 
